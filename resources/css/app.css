@@ -1,0 +1,14 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+/* The 1080×1920 portrait kiosk display. Only large, tall screens match, so phones and desktop windows keep the regular sizes. */
+@custom-variant kiosk (@media (min-width: 1000px) and (min-height: 1600px));
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+    /* Classical capitals that echo the Niners Grand Soirée logo; for headings and labels only. */
+    --font-display: 'Cinzel', ui-serif, Georgia, serif;
+}

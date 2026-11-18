@@ -1,0 +1,355 @@
+@import './app.css';
+
+/*
+ * LED winners screen: ambient background motion. Draw and reveal animations
+ * run from resources/js/screen.js.
+ */
+
+@property --board-beam-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+}
+
+/* Winners board: a gold beam travelling around the border and a soft breathing glow. */
+.screen-board {
+    position: relative;
+    animation: screen-board-glow 5s ease-in-out infinite;
+}
+
+/* A gold beam travelling around an element's border (the board, and the ticket frame for the grand prize). */
+.screen-board::before,
+.screen-ticket-beam {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: conic-gradient(
+        from var(--board-beam-angle),
+        transparent 0deg 240deg,
+        rgb(251 191 36 / 0.2) 285deg,
+        rgb(255 247 214) 330deg,
+        rgb(251 191 36 / 0.2) 350deg,
+        transparent 360deg
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+    mask-clip: content-box, border-box;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+.screen-board::before {
+    padding: 0.14cqw;
+    animation: screen-board-beam 6s linear infinite;
+}
+
+/* Grand prize ------------------------------------------------------------ */
+
+.screen-ticket-beam {
+    padding: 0.25cqw;
+    opacity: 0;
+    transition: opacity 0.6s;
+    animation: screen-board-beam 2.4s linear infinite;
+}
+
+[data-main][data-grand='true'] .screen-ticket-beam {
+    opacity: 1;
+}
+
+[data-main][data-grand='true'][data-mode='revealed'] [data-ticket-frame] {
+    animation: screen-grand-frame 2.4s ease-in-out infinite;
+}
+
+[data-main][data-grand='true'][data-mode='revealed'] [data-winner] {
+    background: linear-gradient(90deg, #fde68a 0%, #fff7d6 20%, #f59e0b 40%, #fde68a 60%, #fff7d6 80%, #fde68a 100%);
+    background-size: 250% 100%;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 1.2cqw rgb(251 191 36 / 0.55));
+    animation: screen-title-shine 5s linear infinite;
+}
+
+.screen-grand-letter {
+    background: linear-gradient(to bottom, #fff7d6 0%, #fde68a 35%, #f59e0b 70%, #b45309 100%);
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 1.5cqw rgb(251 191 36 / 0.55));
+}
+
+.screen-spotlight {
+    background: linear-gradient(to top, rgb(255 236 170 / 0.6), rgb(253 230 138 / 0.2) 40%, transparent 85%);
+    clip-path: polygon(44% 100%, 56% 100%, 100% 0, 0 0);
+    filter: blur(1cqw);
+    transform-origin: 50% 100%;
+    mix-blend-mode: screen;
+    animation: screen-spotlight-sweep 3.5s ease-in-out infinite alternate;
+}
+
+.screen-spotlight-reverse {
+    animation-direction: alternate-reverse;
+}
+
+.screen-ring {
+    position: absolute;
+    width: 10cqw;
+    height: 10cqw;
+    border: 0.25cqw solid rgb(253 230 138 / 0.9);
+    border-radius: 9999px;
+    box-shadow:
+        0 0 2cqw rgb(251 191 36 / 0.6),
+        inset 0 0 2cqw rgb(251 191 36 / 0.4);
+    pointer-events: none;
+}
+
+@keyframes screen-grand-frame {
+    0%,
+    100% {
+        box-shadow: 0 0 5cqw rgb(251 191 36 / 0.4);
+    }
+
+    50% {
+        box-shadow:
+            0 0 10cqw rgb(251 191 36 / 0.75),
+            0 0 2cqw rgb(255 247 214 / 0.6);
+    }
+}
+
+@keyframes screen-spotlight-sweep {
+    from {
+        rotate: -25deg;
+    }
+
+    to {
+        rotate: 25deg;
+    }
+}
+
+.screen-board-title {
+    background: linear-gradient(90deg, #fde68a 0%, #fff7d6 20%, #f59e0b 40%, #fde68a 60%, #fff7d6 80%, #fde68a 100%);
+    background-size: 250% 100%;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 0.6cqw rgb(251 191 36 / 0.45));
+    animation: screen-title-shine 6s linear infinite;
+}
+
+.screen-progress-fill {
+    background: linear-gradient(90deg, #f59e0b, #fde68a, #f59e0b);
+    background-size: 200% 100%;
+    box-shadow: 0 0 0.8cqw rgb(251 191 36 / 0.8);
+    transition: width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    animation: screen-title-shine 3s linear infinite;
+}
+
+/* Board rows. Sizes are in em so the board can shrink to fit more prizes. */
+.screen-row {
+    position: relative;
+    overflow: hidden;
+}
+
+.screen-row-winner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 30%, rgb(253 230 138 / 0.18) 50%, transparent 70%) no-repeat;
+    background-size: 250% 100%;
+    background-position: 150% 0;
+    animation: screen-row-shine 7s ease-in-out infinite;
+    animation-delay: calc(var(--row-index, 0) * 0.35s);
+    pointer-events: none;
+}
+
+.screen-row-active {
+    animation: screen-row-pulse 2.4s ease-in-out infinite;
+}
+
+.screen-row-ticket {
+    text-shadow: 0 0 0.7em rgb(251 191 36 / 0.65);
+}
+
+.screen-badge-winner {
+    animation: screen-badge-glow 3s ease-in-out infinite;
+    animation-delay: calc(var(--row-index, 0) * 0.2s);
+}
+
+.screen-badge-grand {
+    animation: screen-star 3.2s ease-in-out infinite;
+}
+
+.screen-spark {
+    position: absolute;
+    border-radius: 9999px;
+    background: rgb(255 247 214);
+    box-shadow:
+        0 0 0.5cqw rgb(251 191 36),
+        0 0 1cqw rgb(251 191 36 / 0.6);
+    pointer-events: none;
+}
+
+@keyframes screen-board-beam {
+    to {
+        --board-beam-angle: 360deg;
+    }
+}
+
+@keyframes screen-board-glow {
+    0%,
+    100% {
+        box-shadow:
+            0 0 2cqw rgb(251 191 36 / 0.08),
+            inset 0 0 1.5cqw rgb(251 191 36 / 0.04);
+    }
+
+    50% {
+        box-shadow:
+            0 0 4cqw rgb(251 191 36 / 0.22),
+            inset 0 0 2cqw rgb(251 191 36 / 0.09);
+    }
+}
+
+@keyframes screen-title-shine {
+    to {
+        background-position: -250% 0;
+    }
+}
+
+@keyframes screen-row-shine {
+    0% {
+        background-position: 150% 0;
+    }
+
+    35%,
+    100% {
+        background-position: -50% 0;
+    }
+}
+
+@keyframes screen-row-pulse {
+    0%,
+    100% {
+        background-color: rgb(252 211 77 / 0.1);
+        box-shadow:
+            0 0 0 0.1em rgb(252 211 77 / 0.45),
+            0 0 1em rgb(251 191 36 / 0.2);
+    }
+
+    50% {
+        background-color: rgb(252 211 77 / 0.2);
+        box-shadow:
+            0 0 0 0.12em rgb(252 211 77 / 0.9),
+            0 0 2.2em rgb(251 191 36 / 0.45);
+    }
+}
+
+@keyframes screen-badge-glow {
+    0%,
+    100% {
+        box-shadow: 0 0 0.3em rgb(251 191 36 / 0.35);
+    }
+
+    50% {
+        box-shadow: 0 0 0.9em rgb(251 191 36 / 0.85);
+    }
+}
+
+@keyframes screen-star {
+    0%,
+    100% {
+        box-shadow: 0 0 0.4em rgb(251 191 36 / 0.35);
+        scale: 1;
+    }
+
+    50% {
+        box-shadow: 0 0 1.2em rgb(251 191 36 / 0.85);
+        scale: 1.12;
+    }
+}
+
+.screen-rays {
+    background: repeating-conic-gradient(from 0deg, rgb(251 191 36 / 0.07) 0deg 4deg, transparent 4deg 15deg);
+    mask-image: radial-gradient(circle, black 0%, transparent 60%);
+    animation: screen-spin 120s linear infinite;
+}
+
+.screen-glow {
+    animation: screen-breathe 7s ease-in-out infinite;
+}
+
+.screen-float {
+    animation: screen-float 6s ease-in-out infinite;
+}
+
+/* A gold light sweeping across the logo, masked to the logo's own shape. */
+.screen-shine {
+    background: linear-gradient(105deg, transparent 38%, rgb(255 247 214 / 0.7) 50%, transparent 62%) no-repeat;
+    background-size: 250% 100%;
+    -webkit-mask: var(--logo-url) center / contain no-repeat;
+    mask: var(--logo-url) center / contain no-repeat;
+    animation: screen-shine 5.5s ease-in-out 1.6s infinite;
+    background-position: 150% 0;
+}
+
+@keyframes screen-shine {
+    0% {
+        background-position: 150% 0;
+    }
+
+    45%,
+    100% {
+        background-position: -50% 0;
+    }
+}
+
+.screen-sparkle {
+    position: absolute;
+    border-radius: 9999px;
+    background: rgb(253 230 138);
+    box-shadow: 0 0 0.6cqw rgb(251 191 36 / 0.9);
+    opacity: 0;
+    animation: screen-twinkle var(--twinkle-duration, 4s) ease-in-out var(--twinkle-delay, 0s) infinite;
+}
+
+@keyframes screen-spin {
+    to {
+        rotate: 360deg;
+    }
+}
+
+@keyframes screen-breathe {
+    0%,
+    100% {
+        opacity: 0.7;
+        scale: 1;
+    }
+
+    50% {
+        opacity: 1;
+        scale: 1.08;
+    }
+}
+
+@keyframes screen-float {
+    0%,
+    100% {
+        translate: 0 0;
+    }
+
+    50% {
+        translate: 0 -0.5cqw;
+    }
+}
+
+@keyframes screen-twinkle {
+    0%,
+    100% {
+        opacity: 0;
+        scale: 0.3;
+    }
+
+    50% {
+        opacity: 1;
+        scale: 1;
+    }
+}
